@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "tsx --conditions=react-server --test src/lib/password.test.ts src/lib/market-data/bybit.test.ts src/lib/safety.test.ts src/lib/journal/database.test.ts src/lib/journal/metrics.test.ts src/lib/journal/ai.test.ts src/lib/journal/csv.test.ts src/lib/journal/backup.test.ts",
+    "test": "tsx --conditions=react-server --test src/lib/password.test.ts src/lib/market-data/bybit.test.ts src/lib/market-data/scanner.test.ts src/lib/safety.test.ts src/lib/journal/database.test.ts src/lib/journal/metrics.test.ts src/lib/journal/ai.test.ts src/lib/journal/csv.test.ts src/lib/journal/backup.test.ts",
     "typecheck": "tsc --noEmit",
     "auth:hash-password": "node scripts/hash-password.mjs"
   },

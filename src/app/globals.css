@@ -574,6 +574,138 @@ a {
   line-height: 1.4;
 }
 
+.scanner-panel {
+  margin-top: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background:
+    radial-gradient(ellipse at 90% 0%, rgb(27 65 49 / 10%), transparent 42%),
+    var(--panel);
+  padding: 17px 18px 13px;
+}
+
+.scanner-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.scanner-heading .eyebrow {
+  margin: 0 0 6px;
+}
+
+.scanner-heading h2 {
+  margin: 0;
+  color: #e4ebe7;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+}
+
+.scanner-description {
+  max-width: 720px;
+  margin: 8px 0 0;
+  color: #84918c;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.scanner-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.scanner-controls label {
+  display: grid;
+  min-width: 155px;
+  gap: 5px;
+  color: #a9b5af;
+  font-size: 9px;
+}
+
+.scanner-controls select {
+  min-height: 34px;
+  border: 1px solid #303b3b;
+  border-radius: 6px;
+  background: #101617;
+  padding: 7px 9px;
+  color: #e4ebe7;
+  font: inherit;
+  font-size: 10px;
+}
+
+.scanner-controls select:focus-visible {
+  outline: 2px solid #578268;
+  outline-offset: 2px;
+}
+
+.scanner-result {
+  margin-top: 13px;
+  border-top: 1px solid #232d2f;
+  padding-top: 11px;
+}
+
+.scanner-result > p {
+  margin: 0;
+  color: #84918c;
+  font-size: 10px;
+}
+
+.scanner-signal,
+.scanner-no-signal {
+  display: grid;
+  gap: 4px;
+  border-left: 2px solid #697a70;
+  padding: 2px 0 2px 10px;
+}
+
+.scanner-signal strong,
+.scanner-no-signal strong {
+  color: #dbe6df;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.scanner-signal span,
+.scanner-no-signal span,
+.scanner-signal small,
+.scanner-no-signal small {
+  color: #91a09a;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.scanner-signal small,
+.scanner-no-signal small {
+  color: #71807b;
+}
+
+.signal-long {
+  border-color: #69cb98;
+}
+
+.signal-long strong {
+  color: #92d8ae;
+}
+
+.signal-short {
+  border-color: #d27a78;
+}
+
+.signal-short strong {
+  color: #e09b97;
+}
+
+.scanner-footnote {
+  margin: 10px 0 0;
+  color: #71807b;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
 .futures-body {
   display: flex;
   align-items: center;

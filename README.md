@@ -37,6 +37,7 @@ npm run build
 
 - Sign-in uses an owner-configured email and scrypt password hash with NextAuth.js sessions. The session lifetime is 12 hours.
 - The market-data route requires a valid session. It fetches public Bybit ticker and candle data server-side; no Bybit API key is required for those public endpoints.
+- The BTCUSDT dashboard scanner checks for a breakout of the previous 20 completed medium-timeframe candles in the direction of the higher-timeframe 20-candle simple moving average. Timeframes are configurable in the browser. It refreshes every minute and reports in-dashboard conditions only; it is not a profitability claim or trading recommendation.
 - Market data is refreshed in the dashboard every 30 seconds. A failed refresh preserves the last result but marks it stale and shows the error.
 - Times are rendered in the viewer's browser-local timezone, with a separate New York clock for session context.
 - Tradovate credentials are deliberately not requested until a read-only access model and data entitlement are confirmed. TradingView Premium is included in the review but is not treated as an app API or market-data license.

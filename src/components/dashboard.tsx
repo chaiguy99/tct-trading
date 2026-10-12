@@ -4,6 +4,7 @@ import { signOut } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import type { BybitSnapshot } from "@/lib/market-data/bybit";
+import BtcScanner from "./btc-scanner";
 
 type MarketState =
   | { status: "loading" }
@@ -346,6 +347,8 @@ export default function Dashboard({ email }: { email: string }) {
               </p>
             </article>
           </section>
+
+          <BtcScanner />
 
           <div className="section-heading" id="markets">
             <div>
