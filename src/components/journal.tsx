@@ -9,6 +9,25 @@ import type {
   PaperSettings,
 } from "@/lib/journal/types";
 import { parseJournalCsv, type CsvImportPreview } from "@/lib/journal/csv";
+import MultiSelectTags from "./multi-select-tags";
+
+const setupOptions = [
+  "RBR",
+  "KOC",
+  "TCT",
+  "Rejection block confirmation",
+  "NY Open rejection",
+  "Key Open continuation",
+];
+
+const confluenceOptions = [
+  "HTF/MTF/LTF alignment",
+  "SMT divergence",
+  "NY Open context",
+  "Key Open context",
+  "Liquidity sweep",
+  "Displacement confirmation",
+];
 
 type JournalState =
   | { status: "loading" }
@@ -97,6 +116,8 @@ export default function Journal({
   const [csvBusy, setCsvBusy] = useState(false);
   const [backupBusy, setBackupBusy] = useState(false);
   const [backupError, setBackupError] = useState("");
+  const [selectedSetups, setSelectedSetups] = useState<string[]>([]);
+  const [selectedConfluences, setSelectedConfluences] = useState<string[]>([]);
 
   const refresh = useCallback(async () => {
     try {
@@ -208,7 +229,9 @@ export default function Journal({
               ? Number(values.get("riskAmount"))
               : null,
             funding: Number(values.get("funding") || 0),
-            setup: values.get("setup"),
+            setup: "",
+            setups: selectedSetups,
+            confluences: selectedConfluences,
             marketCondition: values.get("marketCondition"),
             thesis: values.get("thesis"),
             notes: values.get("notes"),
@@ -216,6 +239,8 @@ export default function Journal({
         }),
       );
       form.reset();
+      setSelectedSetups([]);
+      setSelectedConfluences([]);
       await refresh();
     } catch (error) {
       setFormError(
@@ -581,7 +606,7 @@ export default function Journal({
                               <td>{trade.quantity}</td>
                               <td>{trade.price}</td>
                               <td>{trade.exit?.price ?? "Open"}</td>
-                              <td>{trade.setup || "—"}</td>
+                              <td>{trade.setups.join(", ") || trade.setup || "—"}</td>
                             </tr>
                           ))}
                         </tbody>
@@ -757,10 +782,30 @@ export default function Journal({
                   type="number"
                 />
               </label>
-              <label>
-                Setup
-                <input maxLength={120} name="setup" placeholder="e.g. NYOP rejection" />
-              </label>
+              <MultiSelectTags
+                label="Setups"
+                name="setups"
+                onChange={setSelectedSetups}
+                options={[
+                  ...setupOptions,
+                  ...(state.status === "ready"
+                    ? state.trades.flatMap((trade) => trade.setups)
+                    : []),
+                ]}
+                selected={selectedSetups}
+              />
+              <MultiSelectTags
+                label="Confluences"
+                name="confluences"
+                onChange={setSelectedConfluences}
+                options={[
+                  ...confluenceOptions,
+                  ...(state.status === "ready"
+                    ? state.trades.flatMap((trade) => trade.confluences)
+                    : []),
+                ]}
+                selected={selectedConfluences}
+              />
               <label>
                 Market condition
                 <input
@@ -1017,7 +1062,10 @@ function TradeRow({
           </span>
         </div>
         <div className="trade-row-meta">
-          {trade.setup || "No setup label"}
+          {trade.setups.join(", ") || trade.setup || "No setup label"}
+          {trade.confluences.length
+            ? ` · ${trade.confluences.join(", ")}`
+            : ""}
           {trade.marketCondition ? ` · ${trade.marketCondition}` : ""}
         </div>
       </div>

@@ -16,6 +16,8 @@ function trade(
     mode: "journal",
     status: "closed",
     setup: "",
+    setups: [],
+    confluences: [],
     marketCondition: "",
     thesis: "",
     notes: "",

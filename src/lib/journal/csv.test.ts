@@ -21,6 +21,17 @@ test("CSV parser handles escaped quotes, multiline text, and optional fields", (
   assert.equal(preview.trades[0].fee, 0);
 });
 
+test("CSV parser reads semicolon-separated setup and confluence tags", () => {
+  const preview = parseJournalCsv(
+    "instrument,side,quantity,price,setups,confluences\nMNQ,long,1,20000,RBR; KOC,SMT divergence; liquidity sweep",
+  );
+  assert.deepEqual(preview.trades[0].setups, ["RBR", "KOC"]);
+  assert.deepEqual(preview.trades[0].confluences, [
+    "SMT divergence",
+    "liquidity sweep",
+  ]);
+});
+
 test("CSV parser validates optional exits and whole-number futures quantities", () => {
   const preview = parseJournalCsv(
     [

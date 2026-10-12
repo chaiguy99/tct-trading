@@ -37,6 +37,8 @@ function trade(index: number): JournalTrade {
     mode: "journal",
     status: "closed",
     setup: "setup",
+    setups: ["setup"],
+    confluences: ["SMT divergence"],
     marketCondition: "trend",
     thesis: "thesis",
     notes: "notes",

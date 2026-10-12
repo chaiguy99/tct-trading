@@ -4,6 +4,7 @@ export const instrumentSchema = z.enum(["MNQ", "NQ", "BTCUSDT"]);
 export const sideSchema = z.enum(["long", "short"]);
 export const modeSchema = z.enum(["journal", "paper"]);
 export const fillKindSchema = z.enum(["entry", "exit"]);
+const tagSchema = z.string().trim().min(1).max(80);
 
 export const createTradeSchema = z.object({
   instrument: instrumentSchema,
@@ -15,6 +16,8 @@ export const createTradeSchema = z.object({
   riskAmount: z.number().finite().positive().max(1_000_000_000).nullable().default(null),
   funding: z.number().finite().min(-1_000_000).max(1_000_000).default(0),
   setup: z.string().trim().max(120).default(""),
+  setups: z.array(tagSchema).max(10).default([]),
+  confluences: z.array(tagSchema).max(20).default([]),
   marketCondition: z.string().trim().max(120).default(""),
   thesis: z.string().trim().max(4_000).default(""),
   notes: z.string().trim().max(4_000).default(""),
@@ -133,6 +136,8 @@ export type JournalTrade = {
   mode: z.infer<typeof modeSchema>;
   status: "open" | "closed";
   setup: string;
+  setups: string[];
+  confluences: string[];
   marketCondition: string;
   thesis: string;
   notes: string;

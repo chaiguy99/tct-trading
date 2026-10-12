@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { chmodSync, mkdirSync } from "node:fs";
 import path from "node:path";
 import { JournalConflictError } from "./errors";
+import { parseStoredTags } from "./tags";
 import type {
   CreateFillInput,
   CreateTradeInput,
@@ -30,6 +31,8 @@ type TradeRow = {
   mode: JournalTrade["mode"];
   status: JournalTrade["status"];
   setup: string;
+  setups: string;
+  confluences: string;
   market_condition: string;
   thesis: string;
   notes: string;
@@ -76,6 +79,8 @@ function getDatabase() {
       mode TEXT NOT NULL CHECK (mode IN ('journal', 'paper')),
       status TEXT NOT NULL CHECK (status IN ('open', 'closed')),
       setup TEXT NOT NULL DEFAULT '',
+      setups TEXT NOT NULL DEFAULT '[]',
+      confluences TEXT NOT NULL DEFAULT '[]',
       market_condition TEXT NOT NULL DEFAULT '',
       thesis TEXT NOT NULL DEFAULT '',
       notes TEXT NOT NULL DEFAULT '',
@@ -120,6 +125,12 @@ function getDatabase() {
       "ALTER TABLE journal_trades ADD COLUMN funding REAL NOT NULL DEFAULT 0",
     );
   }
+  if (!columns.some((column) => column.name === "setups")) {
+    database.exec("ALTER TABLE journal_trades ADD COLUMN setups TEXT NOT NULL DEFAULT '[]'");
+  }
+  if (!columns.some((column) => column.name === "confluences")) {
+    database.exec("ALTER TABLE journal_trades ADD COLUMN confluences TEXT NOT NULL DEFAULT '[]'");
+  }
   const fillColumns = database
     .prepare("PRAGMA table_info(journal_fills)")
     .all() as Array<{ name: string }>;
@@ -132,6 +143,8 @@ function getDatabase() {
 }
 
 function mapTrade(row: TradeRow, fillRows: FillRow[]): JournalTrade {
+  const setups = parseStoredTags(row.setups);
+  const confluences = parseStoredTags(row.confluences);
   const fills: TradeFill[] = fillRows.map((fill) => ({
     id: fill.id,
     kind: fill.kind,
@@ -198,6 +211,8 @@ function mapTrade(row: TradeRow, fillRows: FillRow[]): JournalTrade {
     mode: row.mode,
     status: row.status,
     setup: row.setup,
+    setups: setups.length ? setups : row.setup ? [row.setup] : [],
+    confluences,
     marketCondition: row.market_condition,
     thesis: row.thesis,
     notes: row.notes,
@@ -226,7 +241,8 @@ function queryTrade(ownerId: string, tradeId: string): JournalTrade | null {
   const database = getDatabase();
   const row = database
     .prepare(
-      `SELECT id, instrument, side, mode, status, setup, market_condition,
+      `SELECT id, instrument, side, mode, status, setup, setups, confluences,
+              market_condition,
               thesis, notes, risk_amount, funding, created_at, updated_at
          FROM journal_trades WHERE owner_id = ? AND id = ?`,
     )
@@ -247,7 +263,8 @@ export function listTrades(ownerId: string): JournalTrade[] {
   const database = getDatabase();
   const trades = database
     .prepare(
-      `SELECT id, instrument, side, mode, status, setup, market_condition,
+      `SELECT id, instrument, side, mode, status, setup, setups, confluences,
+              market_condition,
               thesis, notes, risk_amount, funding, created_at, updated_at
          FROM journal_trades WHERE owner_id = ?
          ORDER BY updated_at DESC, id`,
@@ -315,9 +332,9 @@ function insertTrade(
   database
     .prepare(
       `INSERT INTO journal_trades
-        (id, owner_id, instrument, side, mode, status, setup,
+        (id, owner_id, instrument, side, mode, status, setup, setups, confluences,
          market_condition, thesis, notes, risk_amount, funding, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, 'open', ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, 'open', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .run(
       tradeId,
@@ -326,6 +343,8 @@ function insertTrade(
       input.side,
       input.mode,
       input.setup,
+      JSON.stringify(input.setups),
+      JSON.stringify(input.confluences),
       input.marketCondition,
       input.thesis,
       input.notes,

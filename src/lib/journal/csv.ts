@@ -12,6 +12,8 @@ const supportedColumns = new Set([
   "riskamount",
   "funding",
   "setup",
+  "setups",
+  "confluences",
   "marketcondition",
   "thesis",
   "notes",
@@ -145,6 +147,14 @@ export function parseJournalCsv(source: string): CsvImportPreview {
       riskAmount: parseOptionalNumber(record.riskamount) ?? null,
       funding: parseOptionalNumber(record.funding),
       setup: record.setup ?? "",
+      setups: (record.setups ?? "")
+        .split(";")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
+      confluences: (record.confluences ?? "")
+        .split(";")
+        .map((tag) => tag.trim())
+        .filter(Boolean),
       marketCondition: record.marketcondition ?? "",
       thesis: record.thesis ?? "",
       notes: record.notes ?? "",

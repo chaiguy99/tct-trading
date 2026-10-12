@@ -65,6 +65,8 @@ export function createJournalAiContext(
     mode: trade.mode,
     status: trade.status,
     setup: trade.setup,
+    setups: trade.setups,
+    confluences: trade.confluences,
     marketCondition: trade.marketCondition,
     thesis: trade.thesis.slice(0, 500),
     notes: trade.notes.slice(0, 500),

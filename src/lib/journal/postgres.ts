@@ -10,6 +10,7 @@ import type {
   TradeFill,
 } from "./types";
 import { JournalConflictError } from "./errors";
+import { parseStoredTags } from "./tags";
 
 type Db = Sql | TransactionSql;
 
@@ -20,6 +21,8 @@ type TradeRow = {
   mode: JournalTrade["mode"];
   status: JournalTrade["status"];
   setup: string;
+  setups: string;
+  confluences: string;
   market_condition: string;
   thesis: string;
   notes: string;
@@ -79,6 +82,8 @@ function asIso(value: Date | string): string {
 }
 
 function mapTrade(row: TradeRow, rows: FillRow[]): JournalTrade {
+  const setups = parseStoredTags(row.setups);
+  const confluences = parseStoredTags(row.confluences);
   const fills: TradeFill[] = rows.map((fill) => ({
     id: fill.id,
     kind: fill.kind,
@@ -143,6 +148,8 @@ function mapTrade(row: TradeRow, rows: FillRow[]): JournalTrade {
     mode: row.mode,
     status: row.status,
     setup: row.setup,
+    setups: setups.length ? setups : row.setup ? [row.setup] : [],
+    confluences,
     marketCondition: row.market_condition,
     thesis: row.thesis,
     notes: row.notes,
@@ -171,7 +178,8 @@ async function queryTrade(
   tradeId: string,
 ): Promise<JournalTrade | null> {
   const [row] = (await db`
-    SELECT id, instrument, side, mode, status, setup, market_condition,
+    SELECT id, instrument, side, mode, status, setup, setups, confluences,
+           market_condition,
            thesis, notes, risk_amount, funding, created_at, updated_at
       FROM journal_trades WHERE owner_id = ${ownerId} AND id = ${tradeId}
   `) as unknown as TradeRow[];
@@ -187,7 +195,8 @@ async function queryTrade(
 
 async function listTradesWithDb(db: Db, ownerId: string): Promise<JournalTrade[]> {
   const rows = (await db`
-    SELECT id, instrument, side, mode, status, setup, market_condition,
+    SELECT id, instrument, side, mode, status, setup, setups, confluences,
+           market_condition,
            thesis, notes, risk_amount, funding, created_at, updated_at
       FROM journal_trades WHERE owner_id = ${ownerId}
      ORDER BY updated_at DESC, id
@@ -359,11 +368,14 @@ async function insertTrade(
   const entryAt = input.filledAt ? new Date(input.filledAt) : now;
   await db`
     INSERT INTO journal_trades (
-      id, owner_id, instrument, side, mode, status, setup, market_condition,
+      id, owner_id, instrument, side, mode, status, setup, setups, confluences,
+      market_condition,
       thesis, notes, risk_amount, funding, created_at, updated_at
     ) VALUES (
       ${tradeId}, ${ownerId}, ${input.instrument}, ${input.side}, ${input.mode},
-      'open', ${input.setup}, ${input.marketCondition}, ${input.thesis}, ${input.notes},
+      'open', ${input.setup}, ${JSON.stringify(input.setups)},
+      ${JSON.stringify(input.confluences)}, ${input.marketCondition},
+      ${input.thesis}, ${input.notes},
       ${input.riskAmount}, ${input.funding}, ${now}, ${now}
     )
   `;

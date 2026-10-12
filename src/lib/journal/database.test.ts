@@ -35,6 +35,8 @@ test("stores owner-isolated trades, calculates partial fills, and enforces paper
         riskAmount: 20,
         funding: 3.5,
         setup: "NYOP rejection",
+        setups: ["RBR", "NY Open rejection"],
+        confluences: ["SMT divergence", "HTF/MTF/LTF alignment"],
         marketCondition: "trend",
         thesis: "Rejection confirmed.",
         notes: "Waited for confirmation.",
@@ -42,6 +44,11 @@ test("stores owner-isolated trades, calculates partial fills, and enforces paper
     );
 
     assert.equal(manualTrade.status, "open");
+    assert.deepEqual(manualTrade.setups, ["RBR", "NY Open rejection"]);
+    assert.deepEqual(manualTrade.confluences, [
+      "SMT divergence",
+      "HTF/MTF/LTF alignment",
+    ]);
     assert.equal(manualTrade.fills.length, 1);
     addFill(
       "owner-one",
